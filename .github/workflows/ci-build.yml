@@ -59,7 +59,7 @@ jobs:
         # 健康检查
         echo "🔍 执行健康检查..."
         for i in {1..5}; do
-          response=$(curl -s -w "%{http_code}" http://localhost:8080/api/v1/health || echo "000")
+          response=$(curl -s -w "%{http_code}" http://localhost:8080/api/v1/health/ || echo "000")
           http_code=${response: -3}
           
           if [ "$http_code" = "200" ]; then
