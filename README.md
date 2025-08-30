@@ -6,6 +6,12 @@
 
 一个高性能的企业级敏感词检测API服务，支持动态配置、智能仲裁算法和完整的CI/CD流水线。
 
+## 🌐 在线演示
+
+**体验地址**: [https://text.lihongjie.cn/](https://text.lihongjie.cn/)
+
+> 💡 在线演示提供完整的敏感词检测功能，包括Web界面和API接口，您可以直接体验所有特性而无需本地部署。
+
 ## ✨ 核心特性
 
 - 🚀 **高性能**: FastAPI + Gunicorn，支持多进程并发
@@ -122,15 +128,33 @@ start.bat test     # 测试模式 (端口9000)
 ## 📚 API 使用指南
 
 ### Web 界面
-- 检测界面: http://localhost:8000
-- API文档: http://localhost:8000/docs  
-- 健康检查: http://localhost:8000/api/v1/health/
+- **在线演示**: https://text.lihongjie.cn/
+- **本地检测界面**: http://localhost:8000
+- **API文档**: http://localhost:8000/docs (本地) 或 https://text.lihongjie.cn/docs (在线)
+- **健康检查**: http://localhost:8000/api/v1/health/ (本地) 或 https://text.lihongjie.cn/api/v1/health/ (在线)
 
 ### API 端点
 
 #### 敏感词检测
+
+**本地调用示例：**
 ```bash
 curl -X POST "http://localhost:8000/api/v1/detect/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "这是一个测试文本",
+    "config": {
+      "detection_mode": "rule",
+      "categories": ["political", "pornographic"],
+      "return_positions": true,
+      "strictness_level": "standard"
+    }
+  }'
+```
+
+**在线演示API调用：**
+```bash
+curl -X POST "https://text.lihongjie.cn/api/v1/detect/" \
   -H "Content-Type: application/json" \
   -d '{
     "text": "这是一个测试文本",
@@ -464,9 +488,10 @@ git commit -m "perf: 优化检测算法性能"
 
 ## 🔗 相关链接
 
+- [在线演示](https://text.lihongjie.cn/) - 免费体验完整功能
 - [GitHub Repository](https://github.com/lihongjie0209/veri-text)
 - [Docker Hub](https://hub.docker.com/r/lihongjie0209/veri-text)
-- [API文档](http://localhost:8000/docs)
+- [API文档](https://text.lihongjie.cn/docs) - 在线API文档
 - [问题反馈](https://github.com/lihongjie0209/veri-text/issues)
 
 ## 📈 版本历史
