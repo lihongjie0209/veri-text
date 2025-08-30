@@ -348,7 +348,18 @@ curl http://localhost:8000/api/v1/health/
   - 多平台构建 (linux/amd64, linux/arm64)
   - 自动化测试验证
   - 发布到Docker Hub
+  - **自动部署到GCP Cloud Run** 🆕
   - 版本标签管理
+
+#### 🌐 自动部署到Cloud Run
+
+每次发布新版本时，系统会自动：
+1. 构建并推送Docker镜像到Docker Hub
+2. 部署最新镜像到GCP Cloud Run
+3. 执行健康检查和功能测试
+4. 更新线上服务并提供访问URL
+
+**配置指南**: 查看 [GCP Cloud Run设置文档](docs/GCP_CLOUD_RUN_SETUP.md)
 
 ### 自动化测试
 

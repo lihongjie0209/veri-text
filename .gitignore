@@ -273,3 +273,5 @@ public
 # Temporary folders
 tmp/
 temp/
+scripts/gcp-config.yaml
+scripts/gcp-service-account-key.json

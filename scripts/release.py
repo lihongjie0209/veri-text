@@ -46,6 +46,7 @@ class VersionManager:
                 ["git", "describe", "--tags", "--abbrev=0"],
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
                 cwd=self.project_root
             )
             if result.returncode == 0:
@@ -125,6 +126,7 @@ class GitManager:
                 ["git", "status", "--porcelain"],
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
                 cwd=self.project_root
             )
             
@@ -142,6 +144,7 @@ class GitManager:
                 ["git", "log", f"--max-count={count}", "--pretty=format:%H|%s|%an|%ad", "--date=short"],
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
                 cwd=self.project_root
             )
             
@@ -164,13 +167,14 @@ class GitManager:
         """提交所有更改"""
         try:
             # 添加所有文件
-            subprocess.run(["git", "add", "."], cwd=self.project_root, check=True)
+            subprocess.run(["git", "add", "."], cwd=self.project_root, check=True, encoding='utf-8')
             
             # 提交
             subprocess.run(
                 ["git", "commit", "-m", message],
                 cwd=self.project_root,
-                check=True
+                check=True,
+                encoding='utf-8'
             )
             return True
         except subprocess.CalledProcessError:
@@ -182,7 +186,8 @@ class GitManager:
             subprocess.run(
                 ["git", "tag", "-a", tag, "-m", message],
                 cwd=self.project_root,
-                check=True
+                check=True,
+                encoding='utf-8'
             )
             return True
         except subprocess.CalledProcessError:
@@ -191,8 +196,8 @@ class GitManager:
     def push_with_tags(self):
         """推送代码和标签"""
         try:
-            subprocess.run(["git", "push", "origin", "main"], cwd=self.project_root, check=True)
-            subprocess.run(["git", "push", "origin", "--tags"], cwd=self.project_root, check=True)
+            subprocess.run(["git", "push", "origin", "main"], cwd=self.project_root, check=True, encoding='utf-8')
+            subprocess.run(["git", "push", "origin", "--tags"], cwd=self.project_root, check=True, encoding='utf-8')
             return True
         except subprocess.CalledProcessError:
             return False

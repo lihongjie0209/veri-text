@@ -206,3 +206,126 @@ jobs:
         echo "  -e GUNICORN_WORKERS=4 \\" >> $GITHUB_STEP_SUMMARY
         echo "  ${{ env.DOCKERHUB_NAMESPACE }}/${{ env.IMAGE_NAME }}:${VERSION#v}" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
+
+  deploy-cloud-run:
+    needs: [build-and-push, test-image]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') && success()
+    
+    steps:
+    - name: Checkout代码
+      uses: actions/checkout@v4
+    
+    - name: 配置GCP身份验证
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 设置Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      
+    - name: 提取版本号
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "image_uri=${{ env.DOCKERHUB_NAMESPACE }}/${{ env.IMAGE_NAME }}:$VERSION" >> $GITHUB_OUTPUT
+    
+    - name: 部署到Cloud Run
+      run: |
+        echo "🚀 开始部署到GCP Cloud Run..."
+        
+        # 部署到Cloud Run
+        gcloud run deploy ${{ vars.CLOUD_RUN_SERVICE_NAME || 'veri-text' }} \
+          --image=${{ steps.version.outputs.image_uri }} \
+          --platform=managed \
+          --region=${{ vars.GCP_REGION || 'us-central1' }} \
+          --allow-unauthenticated \
+          --port=8000 \
+          --memory=${{ vars.CLOUD_RUN_MEMORY || '1Gi' }} \
+          --cpu=${{ vars.CLOUD_RUN_CPU || '1' }} \
+          --concurrency=${{ vars.CLOUD_RUN_CONCURRENCY || '80' }} \
+          --max-instances=${{ vars.CLOUD_RUN_MAX_INSTANCES || '10' }} \
+          --min-instances=${{ vars.CLOUD_RUN_MIN_INSTANCES || '0' }} \
+          --timeout=${{ vars.CLOUD_RUN_TIMEOUT || '300' }} \
+          --set-env-vars="GUNICORN_WORKERS=${{ vars.GUNICORN_WORKERS || '2' }}" \
+          --set-env-vars="GUNICORN_LOG_LEVEL=${{ vars.GUNICORN_LOG_LEVEL || 'info' }}" \
+          --set-env-vars="GUNICORN_TIMEOUT=${{ vars.CLOUD_RUN_TIMEOUT || '300' }}" \
+          --quiet
+        
+        echo "✅ Cloud Run部署完成"
+    
+    - name: 获取服务URL
+      id: service-url
+      run: |
+        SERVICE_URL=$(gcloud run services describe ${{ vars.CLOUD_RUN_SERVICE_NAME || 'veri-text' }} \
+          --region=${{ vars.GCP_REGION || 'us-central1' }} \
+          --format='value(status.url)')
+        echo "url=$SERVICE_URL" >> $GITHUB_OUTPUT
+        echo "🌐 服务URL: $SERVICE_URL"
+    
+    - name: 健康检查Cloud Run服务
+      run: |
+        echo "🔍 执行Cloud Run服务健康检查..."
+        SERVICE_URL="${{ steps.service-url.outputs.url }}"
+        
+        # 等待服务启动
+        sleep 30
+        
+        # 健康检查
+        response=$(curl -s -w "%{http_code}" "$SERVICE_URL/api/v1/health/")
+        http_code=${response: -3}
+        
+        if [ "$http_code" = "200" ]; then
+          echo "✅ Cloud Run服务健康检查通过"
+        else
+          echo "❌ Cloud Run服务健康检查失败，HTTP状态码: $http_code"
+          echo "响应内容: ${response%???}"
+          exit 1
+        fi
+        
+        # 功能测试
+        echo "🧪 执行功能测试..."
+        test_response=$(curl -s -X POST "$SERVICE_URL/api/v1/detect/" \
+          -H "Content-Type: application/json" \
+          -d '{"text":"这是测试文本","config":{"detection_mode":"rule"}}')
+        
+        if echo "$test_response" | grep -q '"success":true'; then
+          echo "✅ Cloud Run服务功能测试通过"
+        else
+          echo "❌ Cloud Run服务功能测试失败"
+          echo "响应: $test_response"
+          exit 1
+        fi
+        
+        echo "🎉 Cloud Run部署验证完成"
+    
+    - name: 部署总结
+      run: |
+        VERSION=${{ steps.version.outputs.version }}
+        SERVICE_URL="${{ steps.service-url.outputs.url }}"
+        
+        echo "## 🌐 Cloud Run部署成功!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📋 部署信息" >> $GITHUB_STEP_SUMMARY
+        echo "- **版本**: \`v$VERSION\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **镜像**: \`${{ steps.version.outputs.image_uri }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **服务名**: \`${{ vars.CLOUD_RUN_SERVICE_NAME || 'veri-text' }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **区域**: \`${{ vars.GCP_REGION || 'us-central1' }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **服务URL**: [$SERVICE_URL]($SERVICE_URL)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔗 快速访问" >> $GITHUB_STEP_SUMMARY
+        echo "- [🌐 Web界面]($SERVICE_URL)" >> $GITHUB_STEP_SUMMARY
+        echo "- [📚 API文档]($SERVICE_URL/docs)" >> $GITHUB_STEP_SUMMARY
+        echo "- [❤️ 健康检查]($SERVICE_URL/api/v1/health/)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🧪 测试命令" >> $GITHUB_STEP_SUMMARY
+        echo '```bash' >> $GITHUB_STEP_SUMMARY
+        echo "# 健康检查" >> $GITHUB_STEP_SUMMARY
+        echo "curl $SERVICE_URL/api/v1/health/" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "# 敏感词检测测试" >> $GITHUB_STEP_SUMMARY
+        echo "curl -X POST \"$SERVICE_URL/api/v1/detect/\" \\" >> $GITHUB_STEP_SUMMARY
+        echo "  -H \"Content-Type: application/json\" \\" >> $GITHUB_STEP_SUMMARY
+        echo "  -d '{\"text\":\"测试文本\",\"config\":{\"detection_mode\":\"rule\"}}'" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
