@@ -78,7 +78,7 @@ jobs:
         
         # 基础功能测试
         echo "🔧 执行基础功能测试..."
-        test_response=$(curl -s -X POST http://localhost:8080/api/v1/detect \
+        test_response=$(curl -s -X POST http://localhost:8080/api/v1/detect/ \
           -H "Content-Type: application/json" \
           -d '{"text":"测试文本","config":{"detection_mode":"rule"}}' || echo '{"error":"request_failed"}')
         
