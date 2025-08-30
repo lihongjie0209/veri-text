@@ -1,0 +1,331 @@
+/* 自定义样式 */
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --border-radius: 8px;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 导航栏样式 */
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.3rem;
+}
+
+.health-indicator {
+    font-size: 0.9rem;
+}
+
+.health-status-healthy {
+    color: var(--success-color) !important;
+}
+
+.health-status-unhealthy {
+    color: var(--danger-color) !important;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 2px solid #f8f9fa;
+    font-weight: 600;
+}
+
+/* 表单样式 */
+.form-control, .form-select {
+    border-radius: var(--border-radius);
+    border: 1px solid #dee2e6;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+#text-input {
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* 字符计数样式 */
+#char-count {
+    font-weight: 600;
+}
+
+.char-count-warning {
+    color: var(--warning-color) !important;
+}
+
+.char-count-danger {
+    color: var(--danger-color) !important;
+}
+
+/* 按钮样式 */
+.btn {
+    border-radius: var(--border-radius);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+}
+
+/* 检测结果样式 */
+.result-summary {
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.result-summary.safe {
+    background-color: #d1edff;
+    border-left: 4px solid var(--success-color);
+}
+
+.result-summary.sensitive {
+    background-color: #f8d7da;
+    border-left: 4px solid var(--danger-color);
+}
+
+.risk-level {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.risk-level.low {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.risk-level.medium {
+    background-color: var(--warning-color);
+    color: black;
+}
+
+.risk-level.high {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.risk-level.critical {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* 敏感词结果样式 */
+.sensitive-word-item {
+    border: 1px solid #dee2e6;
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: #fff;
+}
+
+.category-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.category-political {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.category-pornographic {
+    background-color: #fdf2f8;
+    color: #be185d;
+}
+
+.category-violent {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.category-spam {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.category-privacy {
+    background-color: #f3e8ff;
+    color: #7c3aed;
+}
+
+/* 置信度条 */
+.confidence-bar {
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.confidence-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.confidence-high {
+    background-color: var(--danger-color);
+}
+
+.confidence-medium {
+    background-color: var(--warning-color);
+}
+
+.confidence-low {
+    background-color: var(--success-color);
+}
+
+/* 统计图表样式 */
+.stats-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.stats-item:last-child {
+    border-bottom: none;
+}
+
+.stats-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* 历史记录样式 */
+.history-item {
+    border: 1px solid #dee2e6;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background-color: #fff;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.history-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.history-text {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.history-meta {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .d-grid.gap-2.d-md-flex {
+        display: grid !important;
+        gap: 0.5rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 加载状态 */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* 错误提示 */
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #f5c6cb;
+    margin-bottom: 1rem;
+}
+
+/* 成功提示 */
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #c3e6cb;
+    margin-bottom: 1rem;
+}

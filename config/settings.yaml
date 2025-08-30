@@ -1,0 +1,46 @@
+# 应用配置文件
+
+# 应用基本信息
+app_name: "敏感词检测服务"
+app_version: "1.0.0"
+debug: false
+
+# 服务配置
+host: "0.0.0.0"
+port: 8000
+workers: 4
+
+# API配置
+api_prefix: "/api/v1"
+docs_url: "/docs"
+openapi_url: "/openapi.json"
+
+# 检测配置
+max_text_length: 10000
+default_detection_mode: "hybrid"
+default_strictness_level: "standard"
+
+# 规则检测配置
+rule_detection_enabled: true
+wordlist_reload_interval: 3600
+
+# ML检测配置
+semantic_detection_enabled: false  # 默认关闭，避免模型加载问题
+model_path: ""
+model_cache_size: 1
+semantic_threshold: 0.8
+
+# 性能配置
+max_concurrent_requests: 100
+request_timeout: 30
+
+# 数据路径配置
+data_dir: "src/data"
+wordlist_dir: "src/data/wordlists"
+model_dir: "src/data/models"
+config_dir: "config"
+
+# 日志配置
+log_level: "INFO"
+log_format: "json"
+log_file: ""

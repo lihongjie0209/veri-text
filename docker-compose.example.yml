@@ -1,0 +1,119 @@
+# Docker Compose 示例配置
+# 展示如何使用环境变量配置敏感词检测服务
+
+version: '3.8'
+
+services:
+  # 开发环境配置 - 单进程，详细日志
+  veri-text-dev:
+    build: .
+    container_name: veri-text-dev
+    ports:
+      - "8080:8000"
+    environment:
+      # Gunicorn基础配置
+      GUNICORN_BIND: "0.0.0.0:8000"
+      GUNICORN_WORKERS: "1"
+      GUNICORN_WORKER_CLASS: "uvicorn.workers.UvicornWorker"
+      GUNICORN_TIMEOUT: "60"
+      GUNICORN_KEEPALIVE: "2"
+      GUNICORN_MAX_REQUESTS: "100"
+      GUNICORN_ACCESS_LOGFILE: "-"
+      GUNICORN_ERROR_LOGFILE: "-"
+      
+      # 应用配置
+      PRODUCTION: "true"
+      LOG_LEVEL: "DEBUG"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # 生产环境配置 - 多进程，高性能
+  veri-text-prod:
+    build: .
+    container_name: veri-text-prod
+    ports:
+      - "8888:8000"
+    environment:
+      # Gunicorn高性能配置
+      GUNICORN_BIND: "0.0.0.0:8000"
+      GUNICORN_WORKERS: "4"
+      GUNICORN_WORKER_CLASS: "uvicorn.workers.UvicornWorker"
+      GUNICORN_TIMEOUT: "30"
+      GUNICORN_KEEPALIVE: "2"
+      GUNICORN_MAX_REQUESTS: "1000"
+      GUNICORN_ACCESS_LOGFILE: "-"
+      GUNICORN_ERROR_LOGFILE: "-"
+      
+      # 应用配置
+      PRODUCTION: "true"
+      LOG_LEVEL: "INFO"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '1.0'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # 负载均衡配置 - 多个实例
+  veri-text-lb1:
+    build: .
+    container_name: veri-text-lb1
+    ports:
+      - "8881:8000"
+    environment:
+      GUNICORN_BIND: "0.0.0.0:8000"
+      GUNICORN_WORKERS: "2"
+      GUNICORN_WORKER_CLASS: "uvicorn.workers.UvicornWorker"
+      GUNICORN_TIMEOUT: "30"
+      GUNICORN_KEEPALIVE: "2"
+      GUNICORN_MAX_REQUESTS: "500"
+      GUNICORN_ACCESS_LOGFILE: "-"
+      GUNICORN_ERROR_LOGFILE: "-"
+      PRODUCTION: "true"
+    volumes:
+      - ./data:/app/data:ro
+      - ./config:/app/config:ro
+
+  veri-text-lb2:
+    build: .
+    container_name: veri-text-lb2
+    ports:
+      - "8882:8000"
+    environment:
+      GUNICORN_BIND: "0.0.0.0:8000"
+      GUNICORN_WORKERS: "2"
+      GUNICORN_WORKER_CLASS: "uvicorn.workers.UvicornWorker"
+      GUNICORN_TIMEOUT: "30"
+      GUNICORN_KEEPALIVE: "2"
+      GUNICORN_MAX_REQUESTS: "500"
+      GUNICORN_ACCESS_LOGFILE: "-"
+      GUNICORN_ERROR_LOGFILE: "-"
+      PRODUCTION: "true"
+    volumes:
+      - ./data:/app/data:ro
+      - ./config:/app/config:ro
+
+# 使用方式：
+# 开发环境: docker-compose -f docker-compose.example.yml up veri-text-dev
+# 生产环境: docker-compose -f docker-compose.example.yml up veri-text-prod
+# 负载均衡: docker-compose -f docker-compose.example.yml up veri-text-lb1 veri-text-lb2

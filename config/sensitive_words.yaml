@@ -1,0 +1,67 @@
+# 敏感词库配置文件
+# 配置各个敏感词库的名称和对应的词库文件路径
+
+wordlists:
+  - name: "其他词"
+    description: "其他词"
+    file: "data/wordlists/其他词.txt"
+    enabled: true
+    weight: 70
+    
+  - name: "反动词"
+    description: "反动词"
+    file: "data/wordlists/反动词.txt"
+    enabled: true
+    weight: 100
+    
+  - name: "政治类"
+    description: "政治类"
+    file: "data/wordlists/政治类.txt"
+    enabled: true
+    weight: 100
+    
+  - name: "暴恐词库"
+    description: "暴恐词库"
+    file: "data/wordlists/暴恐词库.txt"
+    enabled: true
+    weight: 95
+    
+  - name: "民生词库"
+    description: "民生词库"
+    file: "data/wordlists/民生词库.txt"
+    enabled: true
+    weight: 90
+    
+  - name: "涉枪涉爆"
+    description: "涉枪涉爆"
+    file: "data/wordlists/涉枪涉爆.txt"
+    enabled: true
+    weight: 95
+    
+  - name: "百度过滤词"
+    description: "百度过滤词"
+    file: "data/wordlists/百度过滤词.txt"
+    enabled: true
+    weight: 80
+    
+  - name: "色情词库"
+    description: "色情词库"
+    file: "data/wordlists/色情词库.txt"
+    enabled: true
+    weight: 85
+# 全局配置
+global_settings:
+  # 是否启用大小写敏感匹配
+  case_sensitive: false
+  
+  # 是否启用边界检测（完整单词匹配）
+  word_boundary: true
+  
+  # 默认编码
+  encoding: "utf-8"
+  
+  # 是否启用缓存
+  cache_enabled: true
+  
+  # 缓存过期时间（秒）
+  cache_ttl: 3600

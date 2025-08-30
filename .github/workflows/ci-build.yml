@@ -1,0 +1,110 @@
+name: CI Build Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'hotfix/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: 构建Docker镜像
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64
+        push: false
+        tags: veri-text:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: 测试镜像功能
+      run: |
+        echo "🧪 开始测试Docker镜像..."
+        
+        # 启动测试容器
+        docker run -d --name ci-test-container -p 8080:8000 \
+          -e GUNICORN_WORKERS=1 \
+          -e GUNICORN_TIMEOUT=60 \
+          veri-text:test
+        
+        # 等待服务启动
+        echo "⏳ 等待服务启动..."
+        sleep 30
+        
+        # 检查容器状态
+        if ! docker ps | grep -q ci-test-container; then
+          echo "❌ 容器启动失败"
+          docker logs ci-test-container
+          exit 1
+        fi
+        
+        # 健康检查
+        echo "🔍 执行健康检查..."
+        for i in {1..5}; do
+          response=$(curl -s -w "%{http_code}" http://localhost:8080/api/v1/health || echo "000")
+          http_code=${response: -3}
+          
+          if [ "$http_code" = "200" ]; then
+            echo "✅ 健康检查通过 (尝试 $i/5)"
+            break
+          else
+            echo "⏳ 健康检查失败，状态码: $http_code (尝试 $i/5)"
+            if [ $i -eq 5 ]; then
+              echo "❌ 健康检查最终失败"
+              docker logs ci-test-container
+              exit 1
+            fi
+            sleep 10
+          fi
+        done
+        
+        # 基础功能测试
+        echo "🔧 执行基础功能测试..."
+        test_response=$(curl -s -X POST http://localhost:8080/api/v1/detect \
+          -H "Content-Type: application/json" \
+          -d '{"text":"测试文本","config":{"detection_mode":"rule"}}' || echo '{"error":"request_failed"}')
+        
+        if echo "$test_response" | grep -q '"success":true'; then
+          echo "✅ 基础功能测试通过"
+        else
+          echo "❌ 基础功能测试失败"
+          echo "响应: $test_response"
+          docker logs ci-test-container
+          exit 1
+        fi
+        
+        # 清理容器
+        docker stop ci-test-container
+        docker rm ci-test-container
+        
+        echo "🎉 所有测试通过!"
+    
+    - name: 构建结果摘要
+      run: |
+        echo "## 🔨 CI构建结果" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| 项目 | 状态 |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+        echo "| 🏗️ Docker构建 | ✅ 成功 |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔍 健康检查 | ✅ 通过 |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🧪 功能测试 | ✅ 通过 |" >> $GITHUB_STEP_SUMMARY
+        echo "| 📦 推送状态 | ⏸️ 仅测试构建 |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "> 💡 **提示**: 创建以 \`v\` 开头的标签（如 \`v1.0.0\`）可触发正式发布到DockerHub"
