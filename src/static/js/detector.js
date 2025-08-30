@@ -92,7 +92,7 @@ async function handleDetection(event) {
         };
         
         // 发送检测请求
-        const response = await fetch('/api/detect', {
+        const response = await fetch('/api/v1/detect/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -286,7 +286,6 @@ function getRiskLevelText(level) {
 
 function getDetectionModeText(mode) {
     const modes = {
-        'hybrid': '混合检测',
         'rule': '规则检测'
     };
     return modes[mode] || mode;
